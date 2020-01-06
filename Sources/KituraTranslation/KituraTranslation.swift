@@ -119,10 +119,10 @@ public class Translation {
     class func buildKey(string: String, context: String?) -> String {
         let mutableContext = context ?? ""
         var key = string + ":" + mutableContext
-        if key.characters.count < 256 {
+        if key.count < 256 {
             return key
         }
-        let cxLen = mutableContext.characters.count + 1
+        let cxLen = mutableContext.count + 1
         let maxLenForKey = 255 - cxLen
         let endIdx = string.index(string.startIndex, offsetBy: maxLenForKey)
         key = string[string.startIndex...endIdx] + ":" + mutableContext
@@ -141,7 +141,7 @@ public class Translation {
         }
         let dirEnum = FileManager.default.enumerator(atPath: langDirPath)
         while let filePath = dirEnum?.nextObject() as! String? {
-            if filePath.characters.count > 4 && filePath.substring(from: filePath.index(filePath.endIndex, offsetBy: -3)) == ".po" {
+            if filePath.count > 4 && filePath.substring(from: filePath.index(filePath.endIndex, offsetBy: -3)) == ".po" {
                 let pathUrl = URL(fileURLWithPath: langDirPath + "/" + filePath)
                 parsePo(atPath: pathUrl)
             }
@@ -171,13 +171,13 @@ public class Translation {
             for line in poSectionLines {
                 let lineRange = NSRange(location: 0, length: line.utf16.count)
                 if let match = msgPartPattern.firstMatch(in: line, options: [], range: lineRange) {
-                    let typeRange = match.rangeAt(1)
-                    let start = String.UTF16Index(typeRange.location)
-                    let end = String.UTF16Index(typeRange.location + typeRange.length)
+                    let typeRange = match.range(at: 1)
+                    let start = String.UTF16View.Index(encodedOffset: typeRange.location)
+                    let end = String.UTF16View.Index(encodedOffset: typeRange.location + typeRange.length)
                     let type = String(line.utf16[start..<end])
-                    let valRange = match.rangeAt(2)
-                    let vstart = String.UTF16Index(valRange.location)
-                    let vend = String.UTF16Index(valRange.location + valRange.length)
+                    let valRange = match.range(at: 2)
+                    let vstart = String.UTF16View.Index(encodedOffset: valRange.location)
+                    let vend = String.UTF16View.Index(encodedOffset: valRange.location + valRange.length)
                     let value = String(line.utf16[vstart..<vend])
                     if value != "" {
                         switch type! {
@@ -193,9 +193,9 @@ public class Translation {
                     }
                 }
                 else if let match = strContinuePattern.firstMatch(in: line, options: [], range: lineRange) {
-                    let valRange = match.rangeAt(1)
-                    let vstart = String.UTF16Index(valRange.location)
-                    let vend = String.UTF16Index(valRange.location + valRange.length)
+                    let valRange = match.range(at: 1)
+                    let vstart = String.UTF16View.Index(encodedOffset: valRange.location)
+                    let vend = String.UTF16View.Index(encodedOffset: valRange.location + valRange.length)
                     let value = String(line.utf16[vstart..<vend])
                     if msgstr == nil {
                         Log.warning("Detected continuing msgstr before initial msgstr definition in section \(idx) of PO file \(atPath.path) (accepting it as a msgstr anyway).")
@@ -205,7 +205,7 @@ public class Translation {
                         msgstr = msgstr! + value!
                     }
                 }
-                else if line.characters.first == "#" {
+                else if line.first == "#" {
                     // Ignore the comment
                     continue
                 }
