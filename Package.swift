@@ -5,6 +5,12 @@ import PackageDescription
 
 let package = Package(
     name: "KituraTranslation",
+    products: [
+        .library(
+            name: "KituraTranslation",
+            targets: ["KituraTranslation"]
+        )
+    ],
     dependencies: [
         .package(url: "https://github.com/IBM-Swift/LoggerAPI.git", from: "1.9.0")
     ],
